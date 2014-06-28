@@ -46,14 +46,9 @@ case class Customer(
     card
   }
 
-  def updateSubscription(params: Map[String, _]): Subscription = {
+  def createSubscription(params: Map[String, _]): Subscription = {
     request("POST", "%s/subscription".format(instanceURL(id)), params).as[Subscription]
   }
-
-  //
-  //  def cancelSubscription(params: Map[String, _] = Map.empty): Subscription = {
-  //    request("DELETE", "%s/subscription".format(instanceURL(id)), params).extract[Subscription]
-  //  }
 
 }
 
@@ -72,7 +67,7 @@ object Customer extends Resource {
 
   def create(params: Map[String, _]): Customer = request("POST", classURL, params).as[Customer]
 
-  def retrieve(id: String): Customer = request("GET", instanceURL(id)).as[Customer]
+  def find(id: String): Customer = request("GET", instanceURL(id)).as[Customer]
 
   def all(): List[Customer] = request("GET", classURL).as[List[Customer]]
 

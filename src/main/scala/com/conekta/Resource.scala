@@ -52,6 +52,10 @@ abstract class Resource {
 
   def instanceURL(id: String) = "%s/%s".format(classURL, id)
 
+  def parentURL(parentName: Any, parentId: String) = {
+    "%s/%ss/%s".format(ApiBase, parentName, parentId)
+  }
+  
   def parentChildURL(parentName: Any, parentId: String, child: Any, childId: String) = {
     "%s/%ss/%s/%ss/%s".format(ApiBase, parentName, parentId, className(child), childId)
   }

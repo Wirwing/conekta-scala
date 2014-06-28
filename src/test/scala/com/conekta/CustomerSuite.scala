@@ -18,14 +18,14 @@ class CustomerSuite extends FunSuite with ConektaSuite {
     val customers = Customer.all
 
     customers.foreach { customer =>
-      customer.id should equal (customer.cards.head.customerId)
+      customer.id should equal(customer.cards.head.customerId)
     }
 
   }
 
   ignore("Customers can be retreived individually") {
 
-    val retreivedCustomer = Customer.retrieve("cus_oDaDzVH5d1L9upFVc")
+    val retreivedCustomer = Customer.find("cus_oDaDzVH5d1L9upFVc")
 
     retreivedCustomer.id should be("cus_oDaDzVH5d1L9upFVc")
 
@@ -60,38 +60,7 @@ class CustomerSuite extends FunSuite with ConektaSuite {
     customers.head.isInstanceOf[Customer] should be(true)
   }
 
-  ignore("Add card to Customer") {
-
-    val customer = Customer.create(DefaultCustomerMap)
-    val card = customer.createCard(DefaultCardToken)
-    customer.cards.size should equal(1)
-    customer.cards.last.last4 should equal("4242")
-
-  }
-
-  ignore("Update card from Customer") {
-
-    val customer = Customer.create(DefaultCustomerMap)
-    val card = customer.createCard(DefaultCardToken)
-    val updatedCard = card.update(Map("token" -> "tok_test_mastercard_4444"))
-    updatedCard.last4 should equal("4444")
-
-  }
-
-  test("Delete card from Customer") {
-
-    val customer = Customer.create(DefaultCustomerMap)
-    val card = customer.createCard(DefaultCardToken)
-    
-    val previousSize = customer.cards.size
-    
-    val deletedCard = card.delete
-
-    deletedCard.deleted should be (true) 
-
-  }
-
-  test("Delete all customers") {
+  test("All customers can be deleted") {
     val customers = Customer.all
     customers.foreach(costumer => costumer.delete)
   }
