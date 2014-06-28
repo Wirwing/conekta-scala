@@ -6,7 +6,7 @@ import play.api.libs.functional.syntax._
 case class DeletedCard(id: String, deleted: Boolean)
 
 object DeletedCard {
-  implicit val cardReads: Reads[DeletedCard] = (
+  implicit val deletedCardReads: Reads[DeletedCard] = (
     (__ \ "id").read[String] and
     (__ \ "deleted").read[Boolean])(DeletedCard.apply _)
 }
