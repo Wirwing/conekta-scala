@@ -53,7 +53,7 @@ object PaymentMethod {
   implicit object PaymentFormat extends Format[PaymentMethod] {
 
     def reads(json: JsValue) = JsSuccess {
-      (json \ "type").as[String] match {
+      (json \ "object").as[String] match {
         case "card_payment" => json.as[CardPayment]
         case "cash_payment" => json.as[OxxoPayment]
         case "bank_transfer_payment" => json.as[BankTransferPayment]
@@ -63,7 +63,7 @@ object PaymentMethod {
     def writes(payment: PaymentMethod): JsValue = JsObject(Seq(
       "name" -> JsString("name"),
       "type" -> JsString("type")))
-      
+
   }
 
   //  implicit val paymentReads: Reads[PaymentMethod] = (__ \ "type").read[String].flatMap[PaymentMethod] {
@@ -73,6 +73,28 @@ object PaymentMethod {
 
 }
 
+case class Charge(
+  id: String,
+  liveMode: Boolean,
+  createdAt: Int,
+  status: String,
+  paymentMethod: PaymentMethod) extends Resource
+
+object Charge extends Resource {
+
+  implicit val chargeReads: Reads[Charge] = (
+    (__ \ "id").read[String] and
+    (__ \ "livemode").read[Boolean] and
+    (__ \ "created_at").read[Int] and
+    (__ \ "status").read[String] and
+    (__ \ "payment_method").read[PaymentMethod])(Charge.apply _)
+
+  def find(id: String): Charge = request("GET", instanceURL(id)).as[Charge]
+
+  def all(): List[Charge] = request("GET", classURL).as[List[Charge]]
+
+}
+  
 //case class Shipment(
 //  carrier: Option[String],
 //  service: Option[String],
