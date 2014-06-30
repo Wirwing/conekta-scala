@@ -1,23 +1,5 @@
 package com.conekta
 
-import scala.collection.JavaConversions.asJavaCollection
-import scala.collection.JavaConversions.seqAsJavaList
-import scala.util.Properties
-
-import org.apache.http.client.ClientProtocolException
-import org.apache.http.client.entity.UrlEncodedFormEntity
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.client.methods.HttpPut
-import org.apache.http.client.methods.HttpRequestBase
-import org.apache.http.client.params.ClientPNames
-import org.apache.http.impl.client.DefaultHttpClient
-import org.apache.http.message.BasicHeader
-import org.apache.http.message.BasicNameValuePair
-import org.apache.http.params.CoreConnectionPNames
-import org.apache.http.params.CoreProtocolPNames
-import org.apache.http.params.SyncBasicHttpParams
-import org.apache.http.util.EntityUtils
 import org.slf4j.LoggerFactory
 
 import com.typesafe.scalalogging.slf4j.Logger
