@@ -55,7 +55,7 @@ class PlanSuite extends FunSuite with ConektaSuite {
 
     val plan = Plan.create(getUniquePlanMap)
     val customer = Customer.create(DefaultCustomerMap)
-    val card = customer.createCard(DefaultCardToken)
+    val card = customer.createCard(DefaultCardMap.getOrElse("card", "tok_test_visa_4242"))
 
     val subscription = customer.createSubscription(Map("plan" -> plan.id))
     subscription.planId should equal(plan.id)
@@ -66,7 +66,7 @@ class PlanSuite extends FunSuite with ConektaSuite {
 
     val originalPlan = Plan.create(getUniquePlanMap)
     val customer = Customer.create(DefaultCustomerMap)
-    val card = customer.createCard(DefaultCardToken)
+    val card = customer.createCard(DefaultCardMap.getOrElse("card", "tok_test_visa_4242"))
 
     val subscription = customer.createSubscription(Map("plan" -> originalPlan.id))
     subscription.planId should equal(originalPlan.id)
@@ -83,7 +83,7 @@ class PlanSuite extends FunSuite with ConektaSuite {
 
     val plan = Plan.create(getUniquePlanMap)
     val customer = Customer.create(DefaultCustomerMap)
-    val card = customer.createCard(DefaultCardToken)
+    val card = customer.createCard(DefaultCardMap.getOrElse("card", "tok_test_visa_4242"))
 
     val subscription = customer.createSubscription(Map("plan" -> plan.id))
     subscription.status should equal("in_trial")
@@ -99,7 +99,7 @@ class PlanSuite extends FunSuite with ConektaSuite {
 
     val plan = Plan.create(getUniquePlanMap)
     val customer = Customer.create(DefaultCustomerMap)
-    val card = customer.createCard(DefaultCardToken)
+    val card = customer.createCard(DefaultCardMap.getOrElse("card", "tok_test_visa_4242"))
 
     val subscription = customer.createSubscription(Map("plan" -> plan.id))
     subscription.status should equal("in_trial")
@@ -115,7 +115,7 @@ class PlanSuite extends FunSuite with ConektaSuite {
 
     val plan = Plan.create(getUniquePlanMap)
     val customer = Customer.create(DefaultCustomerMap)
-    val card = customer.createCard(DefaultCardToken)
+    val card = customer.createCard(DefaultCardMap.getOrElse("card", "tok_test_visa_4242"))
 
     val subscription = customer.createSubscription(Map("plan" -> plan.id))
     subscription.status should equal("in_trial")

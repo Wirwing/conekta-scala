@@ -65,6 +65,8 @@ object Customer extends Resource {
     (__ \ "cards").read[List[Card]] and
     (__ \ "subscription").readNullable[Subscription])(Customer.apply _)
 
+  def where(params: Map[String, _]): List[Customer] = request("GET", classURL, params).as[List[Customer]]
+
   def create(params: Map[String, _]): Customer = request("POST", classURL, params).as[Customer]
 
   def find(id: String): Customer = request("GET", instanceURL(id)).as[Customer]

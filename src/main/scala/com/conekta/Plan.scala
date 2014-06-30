@@ -49,9 +49,7 @@ object Plan extends Resource {
     return request("POST", classURL, params).as[Plan]
   }
 
-  def where(params: Map[String, _]): List[Plan] = {
-    request("GET", classURL, params).as[List[Plan]]
-  }
+  def where(params: Map[String, _]): List[Plan] = request("GET", classURL, params).as[List[Plan]]
 
   def all(): List[Plan] = this.where(Map.empty)
 

@@ -25,10 +25,12 @@ import play.api.libs.json._
 
 sealed abstract class ConektaException(msg: String, cause: Throwable = null) extends Exception(msg, cause)
 case class APIException(msg: String, cause: Throwable = null) extends ConektaException(msg, cause)
-case class APIConnectionException(msg: String, cause: Throwable = null) extends ConektaException(msg, cause)
-case class CardException(msg: String, code: Option[String] = None, param: Option[String] = None) extends ConektaException(msg)
-case class InvalidRequestException(msg: String, param: Option[String] = None) extends ConektaException(msg)
+case class NoConnectionException(msg: String, cause: Throwable = null) extends ConektaException(msg, cause)
 case class AuthenticationException(msg: String) extends ConektaException(msg)
+case class ParamaterValidationException(msg: String) extends ConektaException(msg)
+case class ProcessingException(msg: String, code: Option[String] = None, param: Option[String] = None) extends ConektaException(msg)
+case class ResourceNotFoundException(msg: String, code: Option[String] = None, param: Option[String] = None) extends ConektaException(msg)
+case class MalformedRequestException(msg: String, code: Option[String] = None, param: Option[String] = None) extends ConektaException(msg)
 
 abstract class Resource {
 
@@ -70,7 +72,7 @@ abstract class Resource {
 
   def httpClient: DefaultHttpClient = {
     if (apiKey == null || apiKey.isEmpty) {
-      throw AuthenticationException("No API key provided. (HINT: set your API key using 'stripe.apiKey = <API-KEY>'. You can generate API keys from the Stripe web interface. See https://stripe.com/api for details or email support@stripe.com if you have questions.")
+      throw AuthenticationException("No API key provided. (HINT: set your API key using 'conekta.apiKey = <API-KEY>'. You can generate API keys from the Conekta web interface.")
     }
 
     //debug headers
@@ -100,13 +102,6 @@ abstract class Resource {
     new HttpGet("%s?%s".format(url, paramList.map(kv => urlEncodePair(kv._1, kv._2)).mkString("&")))
   }
 
-  def deleteRequest(url: String, paramList: List[(String, String)]): HttpRequestBase = {
-    val request = new HttpDeleteWithBody(url)
-    val deleteParamList = paramList.map(kv => new BasicNameValuePair(kv._1, kv._2))
-    request.setEntity(new UrlEncodedFormEntity(seqAsJavaList(deleteParamList), CharSet))
-    request
-  }
-
   def postRequest(url: String, paramList: List[(String, String)]): HttpRequestBase = {
     val request = new HttpPost(url)
     val postParamList = paramList.map(kv => new BasicNameValuePair(kv._1, kv._2))
@@ -124,13 +119,15 @@ abstract class Resource {
   def rawRequest(method: String, url: String, params: Map[String, _] = Map.empty): (String, Int) = {
     val client = httpClient
     val paramList = params.flatMap(kv => flattenParam(kv._1, kv._2)).toList
+    
+    logger.debug(paramList.toString)
+    
     try {
       val request = method.toLowerCase match {
         case "get" => getRequest(url, paramList)
-        case "delete" => deleteRequest(url, paramList)
         case "post" => postRequest(url, paramList)
         case "put" => putRequest(url, paramList)
-        case _ => throw new APIConnectionException("Unrecognized HTTP method %r. This may indicate a bug in the Conekta bindings.".format(method))
+        case _ => throw new APIException("Unrecognized HTTP method %r. This may indicate a bug in the Conekta bindings.".format(method))
       }
       val response = client.execute(request)
       val entity = response.getEntity
@@ -138,7 +135,7 @@ abstract class Resource {
       EntityUtils.consume(entity)
       (body, response.getStatusLine.getStatusCode)
     } catch {
-      case e @ (_: java.io.IOException | _: ClientProtocolException) => throw APIConnectionException("Could not connect to Conekta (%s). Please check your internet connection and try again. If this problem persists, you should check Conekta's service status at https://twitter.com/conektaio".format(ApiBase), e)
+      case e @ (_: java.io.IOException | _: ClientProtocolException) => throw NoConnectionException("Could not connect to Conekta (%s). Please check your internet connection and try again. If this problem persists, you should check Conekta's service status at https://twitter.com/conektaio".format(ApiBase), e)
     } finally {
       client.getConnectionManager.shutdown()
     }
@@ -154,4 +151,21 @@ abstract class Resource {
     jsonAST
   }
 
+  def handleAPIError(rBody: String, rCode: Int, jsonAST: JsValue) {
+    val error = try {
+       jsonAST.as[List[Error]].head
+    } catch {
+      case e: JsResultException => throw new APIException(
+        "Unable to parse response body from API: %s (HTTP response code was %s)".format(rBody, rCode), e)
+    }
+    rCode match {
+      case 400 => throw new MalformedRequestException(error.message, param=error.param)
+      case 401 => throw new AuthenticationException(error.message)
+      case 402 => throw new ProcessingException(error.message, code=error.code, param=error.param)
+      case 404 => throw new ResourceNotFoundException(error.message, code=error.code, param=error.param)
+      case 500 => throw new APIException(error.message, null)
+      case _ => throw new APIException(error.message, null)
+    }
+  }
+  
 }
