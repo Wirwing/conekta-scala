@@ -32,18 +32,22 @@ object Address {
 
 }
 
-case class Refunds(
-  createdAt: Option[Int],
-  amount: Option[Int],
+case class Refund(
+  id: String,
+  createdAt: Int,
+  amount: Int,
+  authCode: String,
   currency: Option[String],
   transaction: Option[String])
 
-object Refunds {
-  implicit val refundReads: Reads[Refunds] = (
-    (__ \ "created_at").readNullable[Int] and
-    (__ \ "amount").readNullable[Int] and
+object Refund {
+  implicit val refundReads: Reads[Refund] = (
+    (__ \ "id").read[String] and
+    (__ \ "created_at").read[Int] and
+    (__ \ "amount").read[Int] and
+    (__ \ "auth_code").read[String] and
     (__ \ "currency").readNullable[String] and
-    (__ \ "transaction").readNullable[String])(Refunds.apply _)
+    (__ \ "transaction").readNullable[String])(Refund.apply _)
 }
 
 case class LineItem(
@@ -95,7 +99,7 @@ object OxxoPayment {
 
 case class CardPayment(
   brand: String,
-  authCode: String,
+  authCode: Option[String],
   last4: String,
   expMonth: String,
   expYear: String,
@@ -104,7 +108,7 @@ case class CardPayment(
 object CardPayment {
   implicit val cardPaymentReads: Reads[CardPayment] = (
     (__ \ "brand").read[String] and
-    (__ \ "auth_code").read[String] and
+    (__ \ "auth_code").readNullable[String] and
     (__ \ "last4").read[String] and
     (__ \ "exp_month").read[String] and
     (__ \ "exp_year").read[String] and

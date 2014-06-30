@@ -17,7 +17,7 @@ case class Charge(
   details: Details,
   fee: Int,
   monthlyInstallments: Option[Int],
-  refunds: Option[Refunds]) extends Resource {
+  refunds: List[Refund]) extends Resource {
 
   def refund(amount: Int = 0): Charge = {
 
@@ -28,6 +28,11 @@ case class Charge(
 
     request("POST", "%s/refund".format(instanceURL(this.id)), paramOrDefault).as[Charge]
   }
+  
+  def capture(): Charge = {
+    request("POST", "%s/capture".format(instanceURL(this.id)), Map.empty).as[Charge]
+  }
+  
 }
 
 object Charge extends Resource {
@@ -46,7 +51,7 @@ object Charge extends Resource {
     (__ \ "details").read[Details] and
     (__ \ "fee").read[Int] and
     (__ \ "monthly_installments").readNullable[Int] and
-    (__ \ "refunds").readNullable[Refunds])(Charge.apply _)
+    (__ \ "refunds").read[List[Refund]])(Charge.apply _)
 
   def create(params: Map[String, _]): Charge = request("POST", classURL, params).as[Charge]
 

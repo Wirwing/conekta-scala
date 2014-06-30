@@ -13,17 +13,16 @@ import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.message.BasicNameValuePair
 
 @RunWith(classOf[JUnitRunner])
-class ChargeSerializationSuite extends FunSuite with ConektaSuite {
+class ChargeSuite extends FunSuite with ConektaSuite {
 
   val logger = Logger(LoggerFactory.getLogger("ChargeSerializationSuite"));
 
-  test("Charge can be retreived individually for given Id"){
-    
+  ignore("Charge can be retreived individually for given Id") {
+
     val charge = Charge.find("53b0f5f2d7e1a0b475000223")
-    
-    
+
   }
-  
+
   ignore("Charges can be retreived individually") {
 
     val chargeData = DefaultChargeMap ++ DefaultCardMap
@@ -99,74 +98,67 @@ class ChargeSerializationSuite extends FunSuite with ConektaSuite {
   ignore("Charge can be complete refunded successfully") {
 
     val chargeData = DefaultChargeMap ++ DefaultCardMap
-    val amount = DefaultCardMap.get("amount")
+    val amount = DefaultChargeMap.get("amount").get.asInstanceOf[Int]
 
     val charge = Charge.create(chargeData)
     charge.status should be("paid")
 
-    charge.paymentMethod.isInstanceOf[CardPayment] should be(true)
-
     val refundedCharge = charge.refund()
     refundedCharge.status should be("refunded")
 
-    refundedCharge.refunds.get.amount should be (amount)
+    refundedCharge.refunds.head.amount should equal(-amount)
+
+  }
+
+  ignore("Charge can be complete partially refunded successfully") {
+
+    val chargeData = DefaultChargeMap ++ DefaultCardMap
+    val amount = DefaultChargeMap.get("amount").get.asInstanceOf[Int]
+
+    val charge = Charge.create(chargeData)
+    charge.status should be("paid")
+
+    val firstRefundedAmount = 1000
+
+    var refundedCharge = charge.refund(firstRefundedAmount)
+    refundedCharge.status should be("partially_refunded")
+    refundedCharge.refunds.size should equal(1)
+    refundedCharge.refunds.head.amount should equal(-firstRefundedAmount)
+
+    val secondRefundedAmount = 3000
+
+    refundedCharge = charge.refund(secondRefundedAmount)
+    refundedCharge.status should be("refunded")
+    refundedCharge.refunds.size should equal(2)
+    refundedCharge.refunds(1).amount should equal(-secondRefundedAmount)
+
+  }
+
+  ignore("Unsuccesful refund charge") {
+
+    val chargeData = DefaultChargeMap ++ DefaultCardMap
+    val amount = DefaultChargeMap.get("amount").get.asInstanceOf[Int]
+
+    val charge = Charge.create(chargeData)
+    charge.status should be("paid")
+
+    intercept[Exception] {
+      val refundedCharge = charge.refund(30000)
+    }
+
+  }
+
+  test("Preauthorized charge can be captured") {
+
+    val captureMap = Map("capture" -> false)
+    
+    val chargeData = DefaultChargeMap ++ DefaultCardMap ++ captureMap
+    val charge = Charge.create(chargeData)
+    charge.status should be("pre_authorized")
+
+    val capturedCharge = charge.capture
+    capturedCharge.status should be("paid")
     
   }
 
-  //  describe :charge_tests do
-  //    p "charge tests"
-  //    before :each do
-  //      @valid_payment_method = {amount: 2000, currency: 'mxn', description: 'Some desc'}
-  //      @invalid_payment_method = {amount: 10, currency: 'mxn', description: 'Some desc'}
-  //      @valid_visa_card = {card: 'tok_test_visa_4242'}
-  //    end
-  //    it "test susccesful refund" do
-  //      pm = @valid_payment_method
-  //      card = @valid_visa_card
-  //      cpm = Conekta::Charge.create(pm.merge(card))
-  //      cpm.status.should eq("paid")
-  //      cpm.refund
-  //      cpm.status.should eq("refunded")
-  //    end
-  //    it "test unsusccesful refund" do
-  //      pm = @valid_payment_method
-  //      card = @valid_visa_card
-  //      cpm = Conekta::Charge.create(pm.merge(card))
-  //      cpm.status.should eq("paid")
-  //      begin
-  //        cpm.refund(3000)
-  //      rescue Conekta::Error => e
-  //        e.message.should eq("The order does not exist or the amount to refund is invalid")
-  //      end
-  //    end
-  //    it "tests succesful card pm create" do
-  //      pm = @valid_payment_method
-  //      card = @valid_visa_card
-  //      capture = {capture: false}
-  //      cpm = Conekta::Charge.create(pm.merge(card).merge(capture))
-  //      cpm.status.should eq("pre_authorized")
-  //      cpm.capture
-  //      cpm.status.should eq("paid")
-  //    end
-  //  end
-
 }
-
-//ignore("Nested serialization"){
-//    
-//    val chargeData = DefaultChargeMap + ("bank" -> Map("type" -> "banorte"))
-//    logger.debug("Data before resource: " + chargeData.toString)
-//    
-//    
-//    val paramList: List[(String, String)] = chargeData.flatMap(kv => Resource.flattenParam(kv._1, kv._2)).toList
-//    logger.debug(paramList.toString)
-//    
-//    val postParamList: List[BasicNameValuePair] = paramList.map(kv => new BasicNameValuePair(kv._1, kv._2))
-//    
-//    logger.debug(postParamList.toString)
-//    
-//    var entity: UrlEncodedFormEntity = new UrlEncodedFormEntity(JavaConversions.seqAsJavaList(postParamList), "UTF-8")
-//    
-////    logger.debug(entity.getContent())
-//    
-//  }
