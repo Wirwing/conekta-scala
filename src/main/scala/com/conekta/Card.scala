@@ -20,19 +20,14 @@ case class Card(
   expYear: String) extends Resource {
 
   def update(updateParams: Map[String, _]): Card = {
-
     val url = parentChildURL("customer", customerId, this, this.id)
     request("PUT", url, updateParams).as[Card]
-    
   }
 
   def delete: DeletedCard = {
-    
     val url = parentChildURL("customer", customerId, this, this.id)
     val deletedCard = request("DELETE", url).as[DeletedCard]
-    
     deletedCard
-
   }
 
 }

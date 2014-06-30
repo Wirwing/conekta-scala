@@ -30,13 +30,9 @@ case class Customer(
   var cards: List[Card],
   subscription: Option[Subscription]) extends Resource {
 
-  def update(params: Map[String, _]): Customer = {
-    request("PUT", instanceURL(this.id), params).as[Customer]
-  }
+  def update(params: Map[String, _]): Customer = request("PUT", instanceURL(this.id), params).as[Customer]
 
-  def delete(): DeletedCustomer = {
-    request("DELETE", instanceURL(this.id)).as[DeletedCustomer]
-  }
+  def delete(): DeletedCustomer = request("DELETE", instanceURL(this.id)).as[DeletedCustomer]
 
   def createCard(token: String): Card = {
     val params = Map("token" -> token)

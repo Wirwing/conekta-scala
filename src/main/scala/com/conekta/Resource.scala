@@ -2,46 +2,41 @@ package com.conekta
 
 import java.net.URLEncoder
 
-import com.typesafe.scalalogging.slf4j
-import com.typesafe.scalalogging.slf4j.Logger
-import org.slf4j.LoggerFactory
-
-import scala.collection.JavaConversions._
-import scala.collection.mutable.ListBuffer
-import scala.util.matching.Regex
+import scala.collection.JavaConversions.asJavaCollection
+import scala.collection.JavaConversions.seqAsJavaList
 import scala.util.Properties
 
-import org.apache.commons.codec.binary.Base64
-import org.apache.http.client._
-import org.apache.http.impl.client._
-import org.apache.http.client.methods._
-import org.apache.http.client.params._
-import org.apache.http.client.entity._
-import org.apache.http.params._
-import org.apache.http.message._
-import org.apache.http.util._
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import org.apache.http.client.ClientProtocolException
+import org.apache.http.client.entity.UrlEncodedFormEntity
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.client.methods.HttpPut
+import org.apache.http.client.methods.HttpRequestBase
+import org.apache.http.client.params.ClientPNames
+import org.apache.http.impl.client.DefaultHttpClient
+import org.apache.http.message.BasicHeader
+import org.apache.http.message.BasicNameValuePair
+import org.apache.http.params.CoreConnectionPNames
+import org.apache.http.params.CoreProtocolPNames
+import org.apache.http.params.SyncBasicHttpParams
+import org.apache.http.util.EntityUtils
+import org.slf4j.LoggerFactory
 
-sealed abstract class ConektaException(msg: String, cause: Throwable = null) extends Exception(msg, cause)
-case class APIException(msg: String, cause: Throwable = null) extends ConektaException(msg, cause)
-case class NoConnectionException(msg: String, cause: Throwable = null) extends ConektaException(msg, cause)
-case class AuthenticationException(msg: String) extends ConektaException(msg)
-case class ParamaterValidationException(msg: String, code: Option[String] = None, param: Option[String] = None) extends ConektaException(msg)
-case class ProcessingException(msg: String, code: Option[String] = None, param: Option[String] = None) extends ConektaException(msg)
-case class ResourceNotFoundException(msg: String, code: Option[String] = None, param: Option[String] = None) extends ConektaException(msg)
-case class MalformedRequestException(msg: String, code: Option[String] = None, param: Option[String] = None) extends ConektaException(msg)
+import com.typesafe.scalalogging.slf4j.Logger
+
+import play.api.libs.json.JsResultException
+import play.api.libs.json.JsValue
+import play.api.libs.json.Json
 
 abstract class Resource {
 
   val logger = Logger(LoggerFactory.getLogger("Resource"));
 
-//  val ApiBase = "https://api.conekta.io"
+  val ApiBase = "https://api.conekta.io"
   val BindingsVersion = "0.3.0"
   val CharSet = "UTF-8"
 
   //Resource utility methods
-  def base64(in: String) = new String(Base64.encodeBase64(in.getBytes(CharSet)))
   def urlEncodePair(k: String, v: String) = "%s=%s".format(URLEncoder.encode(k, CharSet), URLEncoder.encode(v, CharSet))
   val className = this.getClass.getSimpleName.toLowerCase.replace("$", "")
 

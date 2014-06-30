@@ -22,7 +22,7 @@ class ErrorSuite extends FunSuite with ConektaSuite {
 
   ignore("No conection error") {
 
-    ApiBase = "http://localhost:3001"
+//    ApiBase = "http://localhost:3001"
 
     intercept[NoConnectionException] {
       val customer = Customer.create(DefaultCustomerMap)
