@@ -6,10 +6,10 @@ import play.api.libs.functional.syntax._
 case class Charge(
   id: String,
   createdAt: Int,
-  status: Int,
+  status: String,
   currency: String,
-  description: Option[String],
-  referenceId: String,
+  description: String,
+  referenceId: Option[String],
   failureCode: Option[String],
   failureMessage: Option[String],
   amount: Int,
@@ -24,10 +24,10 @@ object Charge extends Resource {
   implicit val chargeReads: Reads[Charge] = (
     (__ \ "id").read[String] and
     (__ \ "created_at").read[Int] and
-    (__ \ "status").read[Int] and
+    (__ \ "status").read[String] and
     (__ \ "currency").read[String] and
-    (__ \ "description").readNullable[String] and
-    (__ \ "reference_id").read[String] and
+    (__ \ "description").read[String] and
+    (__ \ "reference_id").readNullable[String] and
     (__ \ "failure_code").readNullable[String] and
     (__ \ "failure_message").readNullable[String] and
     (__ \ "amount").read[Int] and
@@ -37,6 +37,10 @@ object Charge extends Resource {
     (__ \ "monthly_installments").readNullable[Int] and
     (__ \ "refunds").readNullable[Refunds])(Charge.apply _)
 
+  def create(params: Map[String, _]): Charge = request("POST", classURL, params).as[Charge]
+
+  def where(params: Map[String, _]): List[Charge] = request("GET", classURL, params).as[List[Charge]]
+  
   def find(id: String): Charge = request("GET", instanceURL(id)).as[Charge]
 
   def all(): List[Charge] = request("GET", classURL).as[List[Charge]]

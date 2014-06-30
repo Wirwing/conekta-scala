@@ -33,17 +33,17 @@ object Address {
 }
 
 case class Refunds(
-  createdAt: Int,
-  amount: Int,
-  currency: String,
-  transaction: String)
+  createdAt: Option[Int],
+  amount: Option[Int],
+  currency: Option[String],
+  transaction: Option[String])
 
 object Refunds {
   implicit val refundReads: Reads[Refunds] = (
-    (__ \ "created_at").read[Int] and
-    (__ \ "amount").read[Int] and
-    (__ \ "currency").read[String] and
-    (__ \ "transaction").read[String])(Refunds.apply _)
+    (__ \ "created_at").readNullable[Int] and
+    (__ \ "amount").readNullable[Int] and
+    (__ \ "currency").readNullable[String] and
+    (__ \ "transaction").readNullable[String])(Refunds.apply _)
 }
 
 case class LineItem(

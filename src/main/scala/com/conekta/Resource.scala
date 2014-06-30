@@ -70,7 +70,7 @@ abstract class Resource {
 
   def httpClient: DefaultHttpClient = {
     if (apiKey == null || apiKey.isEmpty) {
-      throw AuthenticationException("No API key provided. (HINT: set your API key using 'stripe.apiKey = <API-KEY>'. You can generate API keys from the Stripe web interface. See https://stripe.com/api for details or email support@stripe.com if you have questions.")
+      throw AuthenticationException("No API key provided. (HINT: set your API key using 'conekta.apiKey = <API-KEY>'. You can generate API keys from the Conekta web interface.")
     }
 
     //debug headers
@@ -100,13 +100,6 @@ abstract class Resource {
     new HttpGet("%s?%s".format(url, paramList.map(kv => urlEncodePair(kv._1, kv._2)).mkString("&")))
   }
 
-  def deleteRequest(url: String, paramList: List[(String, String)]): HttpRequestBase = {
-    val request = new HttpDeleteWithBody(url)
-    val deleteParamList = paramList.map(kv => new BasicNameValuePair(kv._1, kv._2))
-    request.setEntity(new UrlEncodedFormEntity(seqAsJavaList(deleteParamList), CharSet))
-    request
-  }
-
   def postRequest(url: String, paramList: List[(String, String)]): HttpRequestBase = {
     val request = new HttpPost(url)
     val postParamList = paramList.map(kv => new BasicNameValuePair(kv._1, kv._2))
@@ -124,10 +117,12 @@ abstract class Resource {
   def rawRequest(method: String, url: String, params: Map[String, _] = Map.empty): (String, Int) = {
     val client = httpClient
     val paramList = params.flatMap(kv => flattenParam(kv._1, kv._2)).toList
+    
+    logger.debug(paramList.toString)
+    
     try {
       val request = method.toLowerCase match {
         case "get" => getRequest(url, paramList)
-        case "delete" => deleteRequest(url, paramList)
         case "post" => postRequest(url, paramList)
         case "put" => putRequest(url, paramList)
         case _ => throw new APIConnectionException("Unrecognized HTTP method %r. This may indicate a bug in the Conekta bindings.".format(method))
