@@ -14,8 +14,10 @@ trait ConektaSuite extends ShouldMatchers {
   apiKey = "key_VQspiT1DoYVtRGZG"
 
   val DefaultCardMap = Map("card" -> "tok_test_visa_4242")
-    
-  val DefaultChargeMap = Map("amount" -> 1000, "currency" -> "mxn", "description" -> "Scala Charge")
+  
+  val InvalidChargeMap = Map("amount" -> 10, "currency" -> "mxn", "description" -> "Scala Charge")
+  
+  val DefaultChargeMap = Map("amount" -> 4000, "currency" -> "mxn", "description" -> "Scala Charge")
 
   val DefaultCustomerMap = Map("name" -> "Scala Conekta Customer", "email" -> "scala@typesafe.com", "phone" -> "55-5555-5555")
 

@@ -1,5 +1,6 @@
 package com.conekta
 
+import scala.collection.JavaConversions
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
@@ -8,12 +9,21 @@ import java.util.UUID
 import com.typesafe.scalalogging.slf4j
 import com.typesafe.scalalogging.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.apache.http.client.entity.UrlEncodedFormEntity
+import org.apache.http.message.BasicNameValuePair
 
 @RunWith(classOf[JUnitRunner])
 class ChargeSerializationSuite extends FunSuite with ConektaSuite {
 
   val logger = Logger(LoggerFactory.getLogger("ChargeSerializationSuite"));
 
+  test("Charge can be retreived individually for given Id"){
+    
+    val charge = Charge.find("53b0f5f2d7e1a0b475000223")
+    
+    
+  }
+  
   ignore("Charges can be retreived individually") {
 
     val chargeData = DefaultChargeMap ++ DefaultCardMap
@@ -31,31 +41,75 @@ class ChargeSerializationSuite extends FunSuite with ConektaSuite {
   ignore("All charges can be retreived") {
 
     val charges = Charge.all
-    charges.head.getClass().getSimpleName should be ("Charge")
+    charges.head.getClass().getSimpleName should be("Charge")
 
   }
 
   ignore("Charges can be queried") {
-    
+
     val query = Map("description" -> "Scala Charge")
-    
+
     val charges = Charge.where(query)
-    charges.size should be (2)
-    charges.head.getClass().getSimpleName should be ("Charge")
-    
+    charges.size should be(2)
+    charges.head.getClass().getSimpleName should be("Charge")
+
   }
-  
-  test("Charge with bank payment can be created"){
-    
+
+  ignore("Charge with bank payment can be created") {
+
     val bankMap = Map("bank" -> Map("type" -> "banorte"))
     val chargeData = DefaultChargeMap ++ bankMap
-    
-    logger.info(chargeData.toString)
-    
-    val charge = Charge.create(chargeData)
-    charge.status should be ("pending_payment")
 
-    //    charge.paymentMethod.isInstanceOf[BankTransferPayment] should be (true)
+    val charge = Charge.create(chargeData)
+    charge.status should be("pending_payment")
+    charge.paymentMethod.isInstanceOf[BankTransferPayment] should be(true)
+
+  }
+
+  ignore("Charge with card payment can be created") {
+
+    val chargeData = DefaultChargeMap ++ DefaultCardMap
+
+    val charge = Charge.create(chargeData)
+    charge.status should be("paid")
+    charge.paymentMethod.isInstanceOf[CardPayment] should be(true)
+
+  }
+
+  ignore("Charge with oxxo payment can be created") {
+
+    val oxxoMap = Map("cash" -> Map("type" -> "oxxo"))
+    val chargeData = DefaultChargeMap ++ oxxoMap
+
+    val charge = Charge.create(chargeData)
+    charge.status should be("pending_payment")
+    charge.paymentMethod.isInstanceOf[OxxoPayment] should be(true)
+
+  }
+
+  ignore("Unsuccesful charge with card payment") {
+
+    val chargeData = InvalidChargeMap ++ DefaultCardMap
+    intercept[Exception] {
+      val charge = Charge.create(chargeData)
+    }
+
+  }
+
+  ignore("Charge can be complete refunded successfully") {
+
+    val chargeData = DefaultChargeMap ++ DefaultCardMap
+    val amount = DefaultCardMap.get("amount")
+
+    val charge = Charge.create(chargeData)
+    charge.status should be("paid")
+
+    charge.paymentMethod.isInstanceOf[CardPayment] should be(true)
+
+    val refundedCharge = charge.refund()
+    refundedCharge.status should be("refunded")
+
+    refundedCharge.refunds.get.amount should be (amount)
     
   }
 
@@ -65,33 +119,6 @@ class ChargeSerializationSuite extends FunSuite with ConektaSuite {
   //      @valid_payment_method = {amount: 2000, currency: 'mxn', description: 'Some desc'}
   //      @invalid_payment_method = {amount: 10, currency: 'mxn', description: 'Some desc'}
   //      @valid_visa_card = {card: 'tok_test_visa_4242'}
-  //    end
-  //    it "tests succesful bank pm create" do
-  //      pm = @valid_payment_method
-  //      bank = {bank: {'type' => 'banorte'}}
-  //      bpm = Conekta::Charge.create(pm.merge(bank))
-  //      bpm.status.should eq("pending_payment")
-  //    end
-  //    it "tests succesful card pm create" do
-  //      pm = @valid_payment_method
-  //      card = @valid_visa_card
-  //      cpm = Conekta::Charge.create(pm.merge(card))
-  //      cpm.status.should eq("paid")
-  //    end
-  //    it "tests succesful oxxo pm create" do
-  //      pm = @valid_payment_method
-  //      oxxo = {cash: {'type' => 'oxxo'}}
-  //      bpm = Conekta::Charge.create(pm.merge(oxxo))
-  //      bpm.status.should eq("pending_payment")
-  //    end
-  //    it "test unsuccesful pm create" do
-  //      pm = @invalid_payment_method
-  //      card = @valid_visa_card
-  //      begin
-  //        cpm = Conekta::Charge.create(pm.merge(card))
-  //      rescue Conekta::Error => e
-  //        e.message.should eq("The minimum for card payments is 3 pesos. Check that the amount is in cents as explained in the documentation.")
-  //      end
   //    end
   //    it "test susccesful refund" do
   //      pm = @valid_payment_method
@@ -124,3 +151,22 @@ class ChargeSerializationSuite extends FunSuite with ConektaSuite {
   //  end
 
 }
+
+//ignore("Nested serialization"){
+//    
+//    val chargeData = DefaultChargeMap + ("bank" -> Map("type" -> "banorte"))
+//    logger.debug("Data before resource: " + chargeData.toString)
+//    
+//    
+//    val paramList: List[(String, String)] = chargeData.flatMap(kv => Resource.flattenParam(kv._1, kv._2)).toList
+//    logger.debug(paramList.toString)
+//    
+//    val postParamList: List[BasicNameValuePair] = paramList.map(kv => new BasicNameValuePair(kv._1, kv._2))
+//    
+//    logger.debug(postParamList.toString)
+//    
+//    var entity: UrlEncodedFormEntity = new UrlEncodedFormEntity(JavaConversions.seqAsJavaList(postParamList), "UTF-8")
+//    
+////    logger.debug(entity.getContent())
+//    
+//  }

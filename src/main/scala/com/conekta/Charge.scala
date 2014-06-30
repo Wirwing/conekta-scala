@@ -17,7 +17,18 @@ case class Charge(
   details: Details,
   fee: Int,
   monthlyInstallments: Option[Int],
-  refunds: Option[Refunds]) extends Resource
+  refunds: Option[Refunds]) extends Resource {
+
+  def refund(amount: Int = 0): Charge = {
+
+    val paramOrDefault = amount match {
+      case value if value > 0 => Map("amount" -> value)
+      case _ => Map.empty[String, Int]
+    }
+
+    request("POST", "%s/refund".format(instanceURL(this.id)), paramOrDefault).as[Charge]
+  }
+}
 
 object Charge extends Resource {
 
@@ -40,7 +51,7 @@ object Charge extends Resource {
   def create(params: Map[String, _]): Charge = request("POST", classURL, params).as[Charge]
 
   def where(params: Map[String, _]): List[Charge] = request("GET", classURL, params).as[List[Charge]]
-  
+
   def find(id: String): Charge = request("GET", instanceURL(id)).as[Charge]
 
   def all(): List[Charge] = request("GET", classURL).as[List[Charge]]
