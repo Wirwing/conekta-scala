@@ -6,9 +6,11 @@ import play.api.libs.functional.syntax._
 case class DeletedPlan(id: String, deleted: Boolean)
 
 object DeletedPlan {
+  
   implicit val deletedPlanReads: Reads[DeletedPlan] = (
     (__ \ "id").read[String] and
     (__ \ "deleted").read[Boolean])(DeletedPlan.apply _)
+    
 }
 
 case class Plan(
@@ -24,9 +26,7 @@ case class Plan(
   amount: Int,
   expiryCount: Option[Int]) extends Resource {
 
-  def delete(): DeletedPlan = {
-    request("DELETE", instanceURL(this.id)).as[DeletedPlan]
-  }
+  def delete(): DeletedPlan = request("DELETE", instanceURL(this.id)).as[DeletedPlan]
 
 }
 
@@ -45,9 +45,7 @@ object Plan extends Resource {
     (__ \ "amount").read[Int] and
     (__ \ "expiry_count").readNullable[Int])(Plan.apply _)
 
-  def create(params: Map[String, _]): Plan = {
-    return request("POST", classURL, params).as[Plan]
-  }
+  def create(params: Map[String, _]): Plan = return request("POST", classURL, params).as[Plan]
 
   def where(params: Map[String, _]): List[Plan] = request("GET", classURL, params).as[List[Plan]]
 
