@@ -14,7 +14,7 @@ class CardSuite extends FunSuite with ConektaSuite {
 
   val logger = Logger(LoggerFactory.getLogger("CardSuite"));
 
-  ignore("Add card to Customer") {
+  test("Add card to Customer") {
 
     val customer = Customer.create(DefaultCustomerMap)
     val card = customer.createCard(DefaultCardMap.getOrElse("card", "tok_test_visa_4242"))
@@ -23,7 +23,7 @@ class CardSuite extends FunSuite with ConektaSuite {
 
   }
 
-  ignore("Update card from Customer") {
+  test("Update card from Customer") {
 
     val customer = Customer.create(DefaultCustomerMap)
     val card = customer.createCard(DefaultCardMap.getOrElse("card", "tok_test_visa_4242"))
@@ -32,7 +32,7 @@ class CardSuite extends FunSuite with ConektaSuite {
 
   }
 
-  ignore("Delete card from Customer") {
+  test("Delete card from Customer") {
 
     val customer = Customer.create(DefaultCustomerMap)
     val card = customer.createCard(DefaultCardMap.getOrElse("card", "tok_test_visa_4242"))

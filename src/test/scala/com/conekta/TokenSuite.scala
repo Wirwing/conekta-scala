@@ -14,7 +14,7 @@ class TokenSuite extends FunSuite with ConektaSuite {
 
   val logger = Logger(LoggerFactory.getLogger("TokenSuite"));
 
-  ignore("Tokens can be retreived individually") {
+  test("Tokens can be retreived individually") {
 
     val token = Token.find("tok_test_visa_4242")
     token.id should equal("tok_test_visa_4242")

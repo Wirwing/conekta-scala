@@ -14,14 +14,14 @@ class PlanSuite extends FunSuite with ConektaSuite {
 
   val logger = Logger(LoggerFactory.getLogger("PlanSuite"));
 
-  ignore("Plans can be created") {
+  test("Plans can be created") {
 
     val plan = Plan.create(getUniquePlanMap)
     plan.name should equal("Scala Plan")
 
   }
 
-  ignore("Plans can be retreived individually") {
+  test("Plans can be retreived individually") {
 
     val createdPlan = Plan.create(getUniquePlanMap)
     val retreivedPlan = Plan.find(createdPlan.id)
@@ -30,14 +30,14 @@ class PlanSuite extends FunSuite with ConektaSuite {
 
   }
 
-  ignore("Plans can be queried") {
+  test("Plans can be queried") {
 
     val searchedPlans = Plan.where(Map("name" -> "Scala Plan"))
-    searchedPlans.size should be(5)
+    searchedPlans.size should be > (0)
 
   }
 
-  ignore("Plans can be deleted") {
+  test("Plans can be deleted") {
 
     val plan = Plan.create(getUniquePlanMap)
     val deletedPlan = plan.delete()
@@ -51,7 +51,7 @@ class PlanSuite extends FunSuite with ConektaSuite {
     plans.foreach(plan => plan.delete)
   }
 
-  ignore("Customers subscription can be created with a plan") {
+  test("Customers subscription can be created with a plan") {
 
     val plan = Plan.create(getUniquePlanMap)
     val customer = Customer.create(DefaultCustomerMap)
@@ -62,7 +62,7 @@ class PlanSuite extends FunSuite with ConektaSuite {
 
   }
 
-  ignore("A customer's existing plan can be replaced") {
+  test("A customer's existing plan can be replaced") {
 
     val originalPlan = Plan.create(getUniquePlanMap)
     val customer = Customer.create(DefaultCustomerMap)
@@ -79,7 +79,7 @@ class PlanSuite extends FunSuite with ConektaSuite {
 
   }
 
-  ignore("Customer's subscription can be canceled") {
+  test("Customer's subscription can be canceled") {
 
     val plan = Plan.create(getUniquePlanMap)
     val customer = Customer.create(DefaultCustomerMap)
@@ -95,7 +95,7 @@ class PlanSuite extends FunSuite with ConektaSuite {
 
   }
 
-  ignore("Customer's subscription can be paused") {
+  test("Customer's subscription can be paused") {
 
     val plan = Plan.create(getUniquePlanMap)
     val customer = Customer.create(DefaultCustomerMap)

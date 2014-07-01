@@ -17,13 +17,7 @@ class ChargeSuite extends FunSuite with ConektaSuite {
 
   val logger = Logger(LoggerFactory.getLogger("ChargeSerializationSuite"));
 
-  ignore("Charge can be retreived individually for given Id") {
-
-    val charge = Charge.find("53b0f5f2d7e1a0b475000223")
-
-  }
-
-  ignore("Charges can be retreived individually") {
+  test("Charges can be retreived individually") {
 
     val chargeData = DefaultChargeMap ++ DefaultCardMap
     val createdCharge = Charge.create(chargeData)
@@ -32,29 +26,25 @@ class ChargeSuite extends FunSuite with ConektaSuite {
     val charge = Charge.find(createdCharge.id)
     charge.id should be(createdCharge.id)
 
-    //    val paymentMethod = charge.paymentMethod.asInstanceOf[CardPayment] 
-    //    logger.info(paymentMethod.authCode)
-
   }
 
-  ignore("All charges can be retreived") {
+  test("All charges can be retreived") {
 
     val charges = Charge.all
     charges.head.getClass().getSimpleName should be("Charge")
 
   }
 
-  ignore("Charges can be queried") {
+  test("Charges can be queried") {
 
     val query = Map("description" -> "Scala Charge")
 
     val charges = Charge.where(query)
-    charges.size should be(2)
     charges.head.getClass().getSimpleName should be("Charge")
 
   }
 
-  ignore("Charge with bank payment can be created") {
+  test("Charge with bank payment can be created") {
 
     val bankMap = Map("bank" -> Map("type" -> "banorte"))
     val chargeData = DefaultChargeMap ++ bankMap
@@ -65,7 +55,7 @@ class ChargeSuite extends FunSuite with ConektaSuite {
 
   }
 
-  ignore("Charge with card payment can be created") {
+  test("Charge with card payment can be created") {
 
     val chargeData = DefaultChargeMap ++ DefaultCardMap
 
@@ -75,7 +65,7 @@ class ChargeSuite extends FunSuite with ConektaSuite {
 
   }
 
-  ignore("Charge with oxxo payment can be created") {
+  test("Charge with oxxo payment can be created") {
 
     val oxxoMap = Map("cash" -> Map("type" -> "oxxo"))
     val chargeData = DefaultChargeMap ++ oxxoMap
@@ -86,7 +76,7 @@ class ChargeSuite extends FunSuite with ConektaSuite {
 
   }
 
-  ignore("Unsuccesful charge with card payment") {
+  test("Unsuccesful charge with card payment") {
 
     val chargeData = InvalidChargeMap ++ DefaultCardMap
     intercept[Exception] {
@@ -95,7 +85,7 @@ class ChargeSuite extends FunSuite with ConektaSuite {
 
   }
 
-  ignore("Charge can be complete refunded successfully") {
+  test("Charge can be complete refunded successfully") {
 
     val chargeData = DefaultChargeMap ++ DefaultCardMap
     val amount = DefaultChargeMap.get("amount").get.asInstanceOf[Int]
@@ -110,7 +100,7 @@ class ChargeSuite extends FunSuite with ConektaSuite {
 
   }
 
-  ignore("Charge can be complete partially refunded successfully") {
+  test("Charge can be complete partially refunded successfully") {
 
     val chargeData = DefaultChargeMap ++ DefaultCardMap
     val amount = DefaultChargeMap.get("amount").get.asInstanceOf[Int]

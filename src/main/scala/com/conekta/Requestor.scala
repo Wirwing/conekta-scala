@@ -1,11 +1,9 @@
 package com.conekta
 
 import java.net.URLEncoder
-
 import scala.collection.JavaConversions.asJavaCollection
 import scala.collection.JavaConversions.seqAsJavaList
 import scala.util.Properties
-
 import org.apache.http.client.ClientProtocolException
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.HttpGet
@@ -20,8 +18,8 @@ import org.apache.http.params.CoreConnectionPNames
 import org.apache.http.params.CoreProtocolPNames
 import org.apache.http.params.SyncBasicHttpParams
 import org.apache.http.util.EntityUtils
-
 import play.api.libs.json.Json
+import org.apache.http.client.methods.HttpDeleteWithBody
 
 object Requestor {
 
@@ -81,6 +79,13 @@ object Requestor {
     request
   }
 
+  def deleteRequest(url: String, paramList: List[(String, String)]): HttpRequestBase = {
+    val request = new HttpDeleteWithBody(url)
+    val deleteParamList = paramList.map(kv => new BasicNameValuePair(kv._1, kv._2))
+    request.setEntity(new UrlEncodedFormEntity(seqAsJavaList(deleteParamList), Resource.CharSet))
+    request
+  }
+
   def rawRequest(method: String, url: String, params: Map[String, _] = Map.empty): (String, Int) = {
 
     val client = httpClient
@@ -90,7 +95,8 @@ object Requestor {
         case "get" => getRequest(url, paramList)
         case "post" => postRequest(url, paramList)
         case "put" => putRequest(url, paramList)
-        case _ => throw new APIException("Unrecognized HTTP method %r. This may indicate a bug in the Conekta bindings.".format(method))
+        case "delete" => deleteRequest(url, paramList)
+        case _ => throw new APIException("Unrecognized HTTP method %s. This may indicate a bug in the Conekta bindings.".format(method))
       }
       val response = client.execute(request)
       val entity = response.getEntity
@@ -104,7 +110,5 @@ object Requestor {
       client.getConnectionManager.shutdown()
     }
   }
-
-  
 
 }
