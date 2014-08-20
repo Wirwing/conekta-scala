@@ -23,7 +23,7 @@ case class Customer(
   id: String,
   email: String,
   name: String,
-  phone: String,
+  phone: Option[String],
   livemode: Boolean,
   defaultCardId: Option[String],
   createdAt: Int,
@@ -54,7 +54,7 @@ object Customer extends Resource {
     (__ \ "id").read[String] and
     (__ \ "email").read[String] and
     (__ \ "name").read[String] and
-    (__ \ "phone").read[String] and
+    (__ \ "phone").readNullable[String] and
     (__ \ "livemode").read[Boolean] and
     (__ \ "default_card_id").readNullable[String] and
     (__ \ "created_at").read[Int] and
